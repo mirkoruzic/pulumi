@@ -10,6 +10,8 @@ class SecurityGroupComponent:
             name,
             vpc_id=vpc_id,
             description=f"{name} security group",
+            name=name # this is the name of the security group in AWS
+
         )
 
         # Handle "ALL" for ports

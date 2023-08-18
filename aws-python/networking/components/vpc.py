@@ -26,5 +26,6 @@ class VPCComponent:
         stack_name = pulumi.get_stack()
         self.internet_gateway = ec2.InternetGateway(
             f"{stack_name}-internet-gateway",
-            vpc_id=self.vpc.id  # Attach the Internet Gateway to the VPC
+            vpc_id=self.vpc.id,  # Attach the Internet Gateway to the VPC
+         opts=pulumi.ResourceOptions(parent=self.vpc)  # Set VPC as the parent
         )
