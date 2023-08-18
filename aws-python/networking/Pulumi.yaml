@@ -1,0 +1,6 @@
+name: networking
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: This project contains AWS network resources

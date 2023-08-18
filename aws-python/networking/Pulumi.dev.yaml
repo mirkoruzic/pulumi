@@ -1,0 +1,28 @@
+## networking/pulumi.dev.yaml
+
+config:
+  aws:region: eu-west-1
+  vpc:
+    vpcName: dev
+    vpcCidrBlock: 10.0.0.0/16
+    publicSubnetCidr: 10.0.0.0/24
+    privateSubnetCidr: 10.0.1.0/24
+  security_groups:
+    - name: https
+      inbound_port: 443
+      outbound_port: ALL
+      inbound_cidr: 0.0.0.0/0
+      outbound_cidr: 0.0.0.0/0
+      protocol: tcp
+    - name: ssh
+      inbound_port: 22
+      outbound_port: ALL
+      inbound_cidr: 0.0.0.0/0
+      outbound_cidr: 0.0.0.0/0
+      protocol: tcp
+#    - name: all_ports
+#      inbound_port: ALL
+#      outbound_port: ALL
+#      inbound_cidr: 0.0.0.0/0
+#      outbound_cidr: 0.0.0.0/0
+#      protocol: ALL
