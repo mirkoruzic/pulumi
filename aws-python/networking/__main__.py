@@ -7,13 +7,17 @@ from components.nat_gateway import NatGatewayComponent
 from components.security_group import SecurityGroupComponent
 from pulumi_aws import ec2
 
+
 pulumi_config = pulumi.Config()
 
+
 def load_config():
+    pulumi_config = pulumi.Config()
     return pulumi_config.require_object("vpc")
 
 vpc_config = load_config()
 
+# Create VPCComponent first (without the NAT gateway)
 vpc = VPCComponent(
     name=vpc_config["vpcName"],
     cidr_block=vpc_config["vpcCidrBlock"],
@@ -21,9 +25,13 @@ vpc = VPCComponent(
     private_subnet_cidr=vpc_config["privateSubnetCidr"]
 )
 
+# Create NatGatewayComponent
 nat_gateway_component = NatGatewayComponent(
     private_subnet=vpc.private_subnet
 )
+
+# Update the VPC component with the NAT gateway component
+vpc.set_nat_gateway(nat_gateway_component)
 
 # Define outputs for VPC and subnets
 pulumi.export("vpc_id", vpc.vpc.id)
