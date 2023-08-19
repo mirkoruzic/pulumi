@@ -10,4 +10,4 @@ config:
       instanceType: t2.micro
       subnetType: public
       securityGroupName: [https, ssh]
-      associatePublicIp: true  # New parameter to control public IP association
+      associatePublicIp: true
