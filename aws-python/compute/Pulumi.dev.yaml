@@ -4,10 +4,20 @@
 config:
   aws:region: eu-west-1
   ec2_instances:
+    - name: backend_server
+      number: 1
+      ami: ami-0ed752ea0f62749af
+      instanceType: t2.micro
+      subnetType: private
+      securityGroupName: [https, ssh]
+      associatePublicIp: false
     - name: bastion
       number: 1
       ami: ami-0ed752ea0f62749af
       instanceType: t2.micro
       subnetType: public
       securityGroupName: [https, ssh]
-      associatePublicIp: true  # New parameter to control public IP association
+      associatePublicIp: true 
+
+
+

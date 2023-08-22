@@ -1,6 +1,8 @@
 import pulumi
 from components.ec2_instance import EC2Component
 from pulumi import Config, StackReference
+from collections import defaultdict
+
 
 def get_security_group_ids(security_group_names):
     security_group_ids = []
@@ -13,11 +15,13 @@ def get_security_group_ids(security_group_names):
 config = Config()
 ec2_instances = config.require_object("ec2_instances")
 
+
 # Get the current stack's name
 current_stack = pulumi.get_stack()
 
 # Reference the networking stack using the same stack name
 networking_stack = StackReference(f"mruzic/networking/{current_stack}")
+total_monthly_costs = defaultdict(float)
 
 for ec2_instance_config in ec2_instances:
     name = ec2_instance_config["name"]
@@ -38,9 +42,12 @@ for ec2_instance_config in ec2_instances:
         subnet_id = networking_stack.get_output("private_subnet_id")
     else:
         raise Exception("Invalid subnet type. It must be 'public' or 'private'.")
-
+    
     def create_ec2_instances(security_group_ids_list, name, number, ami, instance_type, subnet_id, subnet_type, associate_public_ip):
+
         # Create the number of EC2 instances specified
+        global total_monthly_cost
+
         for i in range(number):
             ec2_name = f"{name}-{i+1:02}"  # Create unique name for each instance
             ec2_component = EC2Component(
@@ -52,11 +59,23 @@ for ec2_instance_config in ec2_instances:
                 associate_public_ip=associate_public_ip
             )
 
+            total_monthly_costs[name] += ec2_component.monthly_cost
+
+
             # Export the EC2 instance details
-            pulumi.export(f"{ec2_name}_id", ec2_component.ec2_instance.id)
-            pulumi.export(f"{ec2_name}_private_ip", ec2_component.ec2_instance.private_ip)
-            pulumi.export(f"{ec2_name}_public_ip", ec2_component.ec2_instance.public_ip if subnet_type == "public" else "N/A")
-            pulumi.export(f"{ec2_name}_private_dns", ec2_component.ec2_instance.private_dns)
-            pulumi.export(f"{ec2_name}_public_dns", ec2_component.ec2_instance.public_dns if subnet_type == "public" else "N/A")
+            #pulumi.export(f"{ec2_name}_id", ec2_component.ec2_instance.id)
+            #pulumi.export(f"{ec2_name}_private_ip", ec2_component.ec2_instance.private_ip)
+            #pulumi.export(f"{ec2_name}_public_ip", ec2_component.ec2_instance.public_ip if subnet_type == "public" else "N/A")
+            #pulumi.export(f"{ec2_name}_private_dns", ec2_component.ec2_instance.private_dns)
+            #pulumi.export(f"{ec2_name}_public_dns", ec2_component.ec2_instance.public_dns if subnet_type == "public" else "N/A")
+            pulumi.export(f"{ec2_name}_hourly_cost", ec2_component.hourly_cost) # Exporting the hourly cost
+            pulumi.export(f"{ec2_name}_daily_cost", ec2_component.daily_cost)   # Exporting the daily cost
+            pulumi.export(f"{ec2_name}_monthly_cost", ec2_component.monthly_cost) # Exporting the monthly cost
+
+            
+
 
     create_ec2_instances(security_group_ids_list, name, number, ami, instance_type, subnet_id, subnet_type, associate_public_ip)
+
+for group_name, group_total_monthly_cost in total_monthly_costs.items():
+    pulumi.export(f"{group_name}_total_monthly_cost", group_total_monthly_cost)
