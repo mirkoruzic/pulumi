@@ -17,7 +17,11 @@ config:
       instanceType: t2.micro
       subnetType: public
       securityGroupName: [https, ssh]
+<<<<<<< HEAD
       associatePublicIp: true 
 
 
 
+=======
+      associatePublicIp: true
+>>>>>>> 9999e7e02c005190a4184bd4b9a058e06c9163df
