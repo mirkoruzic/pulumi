@@ -27,11 +27,11 @@ vpc = VPCComponent(
 
 # Create NatGatewayComponent
 nat_gateway_component = NatGatewayComponent(
+    public_subnet=vpc.public_subnet,
     private_subnet=vpc.private_subnet
+
 )
 
-# Update the VPC component with the NAT gateway component
-vpc.set_nat_gateway(nat_gateway_component)
 
 # Define outputs for VPC and subnets
 pulumi.export("vpc_id", vpc.vpc.id)
