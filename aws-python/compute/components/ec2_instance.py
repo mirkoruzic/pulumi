@@ -9,30 +9,46 @@ REGION_MAPPING = {
 }
 
 class EC2Component:
-    def __init__(self, ec2_name, ami, instance_type, subnet_id, security_group_id, associate_public_ip=False):
+    def __init__(self, ec2_name, ami, instance_type, subnet_id, security_group_id, ssh_key_name, associate_public_ip=False, user_data=None, private_ip=None):
         config = Config("compute")
         ec2_instances_config = config.require_object("ec2_instances")
-
+        self.ssh_key_name = ssh_key_name
         number_of_instances = next((instance["number"] for instance in ec2_instances_config if instance["name"] == ec2_name), 1)
 
         price_per_hour = self.get_on_demand_instance_price(instance_type, "eu-west-1")
         daily_cost = price_per_hour * 24 * number_of_instances
         monthly_cost = daily_cost * 30
 
+        if not private_ip or private_ip == "none":
+            private_ip = None  # Ensure AWS auto-assigns the IP
+
+        if user_data is None:
+            user_data = self.generate_user_data_script(ec2_name)
+
         self.ec2_instance = ec2.Instance(
             ec2_name,
+            key_name=self.ssh_key_name,
             instance_type=instance_type,
             ami=ami,
             subnet_id=subnet_id,
             vpc_security_group_ids=security_group_id,
             associate_public_ip_address=associate_public_ip,
-            tags={"Name": ec2_name}
+            tags={"Name": ec2_name},
+            user_data=user_data,
+            private_ip=private_ip
         )
 
         self.hourly_cost = price_per_hour
         self.daily_cost = daily_cost
         self.monthly_cost = monthly_cost
-
+    
+    @staticmethod
+    def generate_user_data_script(ec2_name):
+        return f"""#!/bin/bash
+                   echo "Setting hostname to {ec2_name}"
+                   hostnamectl set-hostname {ec2_name}
+                   """
+    
     @staticmethod
     def get_on_demand_instance_price(instance_type, region):
         client = boto3.client('pricing', region_name='us-east-1')
@@ -62,3 +78,4 @@ class EC2Component:
             price_per_hour = 0
 
         return price_per_hour
+

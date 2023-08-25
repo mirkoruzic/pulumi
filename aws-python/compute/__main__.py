@@ -1,6 +1,6 @@
 import pulumi
 from components.ec2_instance import EC2Component
-from pulumi import Config, StackReference
+from pulumi import Config, StackReference, Output
 from collections import defaultdict
 
 
@@ -30,6 +30,8 @@ for ec2_instance_config in ec2_instances:
     instance_type = ec2_instance_config["instanceType"]
     subnet_type = ec2_instance_config["subnetType"]
     security_group_names = ec2_instance_config["securityGroupName"]
+    ssh_key_name = ec2_instance_config["use_ssh"]  # Get the SSH key name from the configuration
+
     associate_public_ip = ec2_instance_config.get("associatePublicIp", False) if subnet_type == "public" else False
 
     # Get security group IDs based on names
@@ -43,20 +45,38 @@ for ec2_instance_config in ec2_instances:
     else:
         raise Exception("Invalid subnet type. It must be 'public' or 'private'.")
     
-    def create_ec2_instances(security_group_ids_list, name, number, ami, instance_type, subnet_id, subnet_type, associate_public_ip):
+    static_private_ips = ec2_instance_config.get("staticPrivateIp", [])
+
+    if static_private_ips == "none":
+        static_private_ips = ["none"] * number  # Create a list of 'none' values to represent auto-assign
+    elif not isinstance(static_private_ips, list):
+        raise ValueError(f"'staticPrivateIp' for {name} should be either 'none' or a array of IPs.")
+
+    if len(static_private_ips) != number:
+        raise Exception(f"Number of static IPs provided ({len(static_private_ips)}) does not match the number of instances ({number}) for {name}.")
+
+    
+    def create_ec2_instances(security_group_ids_list, name, number, ami, instance_type, subnet_id, subnet_type, ssh_key_name, associate_public_ip, static_private_ips):
 
         # Create the number of EC2 instances specified
         global total_monthly_cost
+            # Set hostname using user_data
+
 
         for i in range(number):
             ec2_name = f"{name}-{i+1:02}"  # Create unique name for each instance
+
             ec2_component = EC2Component(
                 ec2_name=ec2_name,
                 ami=ami,
                 instance_type=instance_type,
                 subnet_id=subnet_id,
                 security_group_id=security_group_ids_list,
-                associate_public_ip=associate_public_ip
+                ssh_key_name=ssh_key_name,  # Pass the SSH key name
+                associate_public_ip=associate_public_ip,
+                private_ip=static_private_ips[i] if static_private_ips[i] != "none" else None
+
+
             )
 
             total_monthly_costs[name] += ec2_component.monthly_cost
@@ -75,7 +95,9 @@ for ec2_instance_config in ec2_instances:
             
 
 
-    create_ec2_instances(security_group_ids_list, name, number, ami, instance_type, subnet_id, subnet_type, associate_public_ip)
+    create_ec2_instances(security_group_ids_list, name, number, ami, instance_type, subnet_id, subnet_type, ssh_key_name, associate_public_ip, static_private_ips)
 
 for group_name, group_total_monthly_cost in total_monthly_costs.items():
     pulumi.export(f"{group_name}_total_monthly_cost", group_total_monthly_cost)
+
+    
