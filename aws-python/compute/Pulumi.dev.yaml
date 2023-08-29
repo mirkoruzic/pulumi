@@ -18,10 +18,21 @@ config:
       ami: ami-0ed752ea0f62749af
       use_ssh: aws-ssh-key2-8e32835
       instanceType: t2.micro
-      subnetType: private
+      subnetType: private2
       securityGroupName: [https, ssh]
-      associatePublicIp: true
+      associatePublicIp: false
       staticPrivateIp: none
+  eks_cluster:
+    version: "1.25"
+    node_groups:
+      - name: node-group-1
+        instanceType: t3.micro
+        desiredCapacity: 1
+        minSize: 1
+        maxSize: 2
+        securityGroupName: [ssh]
+        ssh_key_name: aws-ssh-key2-8e32835
+
 
 
 

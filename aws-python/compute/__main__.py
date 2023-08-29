@@ -1,19 +1,19 @@
 import pulumi
 from components.ec2_instance import EC2Component
+from components.eks import EKSComponent
 from pulumi import Config, StackReference, Output
 from collections import defaultdict
+from pulumi_aws import eks
+import utils
+from utils import get_security_group_ids
 
-
-def get_security_group_ids(security_group_names):
-    security_group_ids = []
-    for sg_name in security_group_names:
-        sg_id = networking_stack.get_output(f"{sg_name}_security_group_id")
-        security_group_ids.append(sg_id)
-    return security_group_ids
 
 # Read configuration
 config = Config()
 ec2_instances = config.require_object("ec2_instances")
+eks_cluster = config.require_object("eks_cluster")
+ssh_key_name = eks_cluster["node_groups"][0]["ssh_key_name"]
+
 
 
 # Get the current stack's name
@@ -21,6 +21,10 @@ current_stack = pulumi.get_stack()
 
 # Reference the networking stack using the same stack name
 networking_stack = StackReference(f"mruzic/networking/{current_stack}")
+identity_stack = StackReference(f"mruzic/identity/{current_stack}")
+
+
+
 total_monthly_costs = defaultdict(float)
 
 for ec2_instance_config in ec2_instances:
@@ -35,15 +39,17 @@ for ec2_instance_config in ec2_instances:
     associate_public_ip = ec2_instance_config.get("associatePublicIp", False) if subnet_type == "public" else False
 
     # Get security group IDs based on names
-    security_group_ids_list = get_security_group_ids(security_group_names)
+    security_group_ids_list = get_security_group_ids(security_group_names, networking_stack)
 
     # Based on the subnet type, decide which subnet ID to use
     if subnet_type == "public":
         subnet_id = networking_stack.get_output("public_subnet_id")
     elif subnet_type == "private":
         subnet_id = networking_stack.get_output("private_subnet_id")
+    elif subnet_type == "private2":
+        subnet_id = networking_stack.get_output("private_subnet_id")
     else:
-        raise Exception("Invalid subnet type. It must be 'public' or 'private'.")
+        raise Exception("Invalid subnet type. It must be 'public' or 'private' or 'private2'.")
     
     static_private_ips = ec2_instance_config.get("staticPrivateIp", [])
 
@@ -100,4 +106,35 @@ for ec2_instance_config in ec2_instances:
 for group_name, group_total_monthly_cost in total_monthly_costs.items():
     pulumi.export(f"{group_name}_total_monthly_cost", group_total_monthly_cost)
 
-    
+
+#### EKS ########
+
+eks_node_groups = eks_cluster["node_groups"]
+eks_subnet_id = networking_stack.get_output("private_subnet_id")
+eks_subnet_id2 = networking_stack.get_output("private_subnet_id2")
+
+
+eks_vpc_config = eks.ClusterVpcConfigArgs(
+    public_access_cidrs=['0.0.0.0/0'],
+    security_group_ids=get_security_group_ids(eks_cluster['node_groups'][0]['securityGroupName'], networking_stack),
+    subnet_ids=[eks_subnet_id,eks_subnet_id2],
+)
+
+eks_cluster_config = config.require_object('eks_cluster')
+# Get IAM role ARNs from the identity stack
+eks_role_arn = identity_stack.get_output("eks_role_arn")
+ec2_role_arn = identity_stack.get_output("ec2_role_arn")
+
+# Create EKS Cluster and Node Groups
+eks_component = EKSComponent(
+    name=f"{current_stack}-eks-cluster",
+    version=eks_cluster_config['version'],
+    node_groups=eks_cluster_config['node_groups'],
+    vpc_config=eks_vpc_config,
+    role_arn=eks_role_arn,
+    node_role_arn=ec2_role_arn,
+)
+
+# Export kubeconfig
+pulumi.export('cluster-name', eks_component.cluster.name)
+pulumi.export('kubeconfig', utils.generate_kube_config(eks_component.cluster))
