@@ -4,7 +4,7 @@ from pulumi import Config
 from .nat_gateway import NatGatewayComponent
 
 class VPCComponent:
-    def __init__(self, name, cidr_block, public_subnet_cidr, private_subnet_cidr, nat_gateway_component=None):
+    def __init__(self, name, cidr_block, public_subnet_cidr, private_subnet_cidr, private_subnet_cidr2, nat_gateway_component=None):
         config = Config()
         vpc_config = config.require_object("vpc")
         public_route_cidr_block = vpc_config["publicRouteCidr"]
@@ -24,6 +24,17 @@ class VPCComponent:
             cidr_block=private_subnet_cidr,
             vpc_id=self.vpc.id,
             tags={"Name": name + "-private-subnet"},
+            availability_zone="eu-west-1a",
+
+            opts=pulumi.ResourceOptions(parent=self.vpc)
+        )
+
+        self.private_subnet2 = ec2.Subnet(
+            name + "-private-subnet2",
+            cidr_block=private_subnet_cidr2,
+            availability_zone="eu-west-1b",
+            vpc_id=self.vpc.id,
+            tags={"Name": name + "-private-subnet2"},
             opts=pulumi.ResourceOptions(parent=self.vpc)
         )
 

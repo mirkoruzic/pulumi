@@ -22,14 +22,15 @@ vpc = VPCComponent(
     name=vpc_config["vpcName"],
     cidr_block=vpc_config["vpcCidrBlock"],
     public_subnet_cidr=vpc_config["publicSubnetCidr"],
-    private_subnet_cidr=vpc_config["privateSubnetCidr"]
+    private_subnet_cidr=vpc_config["privateSubnetCidr"],
+    private_subnet_cidr2=vpc_config["privateSubnetCidr2"]
 )
 
 # Create NatGatewayComponent
 nat_gateway_component = NatGatewayComponent(
     public_subnet=vpc.public_subnet,
-    private_subnet=vpc.private_subnet
-
+    private_subnet=vpc.private_subnet,
+    private_subnet2=vpc.private_subnet2
 )
 
 
@@ -37,6 +38,7 @@ nat_gateway_component = NatGatewayComponent(
 pulumi.export("vpc_id", vpc.vpc.id)
 pulumi.export("public_subnet_id", vpc.public_subnet.id)
 pulumi.export("private_subnet_id", vpc.private_subnet.id)
+pulumi.export("private_subnet_id2", vpc.private_subnet2.id)
 
 # Define outputs for NAT Gateway
 pulumi.export("nat_gateway_id", nat_gateway_component.nat_gateway.id)
