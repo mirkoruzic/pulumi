@@ -3,51 +3,35 @@
 import pulumi
 from components.vpc import VPCComponent
 from components.nat_gateway import NatGatewayComponent
-#from components.internet_gateway import InternetGatewayComponent
 from components.security_group import SecurityGroupComponent
 from pulumi_aws import ec2
 
+##### Create VPCComponent #####
 
 pulumi_config = pulumi.Config()
+vpc_config = pulumi_config.require_object("vpc")
+vpc = VPCComponent(name=vpc_config["vpcName"])
 
-
-def load_config():
-    pulumi_config = pulumi.Config()
-    return pulumi_config.require_object("vpc")
-
-vpc_config = load_config()
-
-# Create VPCComponent first (without the NAT gateway)
-vpc = VPCComponent(
-    name=vpc_config["vpcName"],
-    cidr_block=vpc_config["vpcCidrBlock"],
-    public_subnet_cidr=vpc_config["publicSubnetCidr"],
-    private_subnet_cidr=vpc_config["privateSubnetCidr"],
-    private_subnet_cidr2=vpc_config["privateSubnetCidr2"]
-)
-
-# Create NatGatewayComponent
-nat_gateway_component = NatGatewayComponent(
-    public_subnet=vpc.public_subnet,
-    private_subnet=vpc.private_subnet,
-    private_subnet2=vpc.private_subnet2
-)
-
-
-# Define outputs for VPC and subnets
 pulumi.export("vpc_id", vpc.vpc.id)
-pulumi.export("public_subnet_id", vpc.public_subnet.id)
-pulumi.export("private_subnet_id", vpc.private_subnet.id)
-pulumi.export("private_subnet_id2", vpc.private_subnet2.id)
+for i, subnet in enumerate(vpc.public_subnet):
+    pulumi.export(f"public_subnet_id_{i+1}", subnet.id)
+for i, subnet in enumerate(vpc.private_subnet):
+    pulumi.export(f"private_subnet_id_{i+1}", subnet.id)
 
-# Define outputs for NAT Gateway
+pulumi.export("internet_gateway_id", vpc.internet_gateway.id)
+################################
+
+##### Create NatGatewayComponent #####
+nat_gateway_component = NatGatewayComponent(
+    public_subnet=vpc.public_subnet[0],  # First public subnet
+    private_subnets=vpc.private_subnet,  # List of private subnets
+)
+
 pulumi.export("nat_gateway_id", nat_gateway_component.nat_gateway.id)
 pulumi.export("nat_gateway_ip", nat_gateway_component.nat_gateway.public_ip)
+#####################################
 
-# Define outputs for the Internet Gateway
-pulumi.export("internet_gateway_id", vpc.internet_gateway.id)
-
-# Create Security Groups
+##### Create SecurityGroupComponent #####
 security_groups_config = pulumi_config.require_object("security_groups")
 vpc_id = vpc.vpc.id
 
@@ -64,3 +48,4 @@ for sg_config in security_groups_config:
 
     pulumi.export(f"{sg_config['name']}_security_group_id", security_group_component.security_group.id)
     pulumi.export(f"{sg_config['name']}_security_group_name", sg_config['name'])
+################################

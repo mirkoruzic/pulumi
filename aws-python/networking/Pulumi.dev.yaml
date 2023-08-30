@@ -1,15 +1,12 @@
 ## networking/pulumi.dev.yaml
 
 config:
-  aws:region: eu-west-1
   vpc:
+    region: eu-west-1
     vpcName: dev
     vpcCidrBlock: 10.0.0.0/16
-    publicSubnetCidr: 10.0.0.0/24
-    privateSubnetCidr: 10.0.1.0/24
-    privateSubnetCidr2: 10.0.2.0/24
-    privateRouteCidr: 0.0.0.0/0
     publicRouteCidr: 0.0.0.0/0
+    privateRouteCidr: 0.0.0.0/0
   security_groups:
     - name: https
       inbound_port: 443
