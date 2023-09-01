@@ -4,6 +4,7 @@ from components.eks import EKSComponent
 from pulumi import Config, StackReference, Output
 from collections import defaultdict
 from pulumi_aws import eks
+import boto3
 import utils
 from utils import get_security_group_ids
 
@@ -13,7 +14,9 @@ config = Config()
 ec2_instances = config.require_object("ec2_instances")
 eks_cluster = config.require_object("eks_cluster")
 ssh_key_name = eks_cluster["node_groups"][0]["ssh_key_name"]
-
+ec2_client = boto3.client('ec2')
+response = ec2_client.describe_availability_zones()
+num_azs = len(response['AvailabilityZones'])
 
 
 # Get the current stack's name
@@ -41,15 +44,41 @@ for ec2_instance_config in ec2_instances:
     # Get security group IDs based on names
     security_group_ids_list = get_security_group_ids(security_group_names, networking_stack)
 
-    # Based on the subnet type, decide which subnet ID to use
-    if subnet_type == "public":
-        subnet_id = networking_stack.get_output("public_subnet_id")
-    elif subnet_type == "private":
-        subnet_id = networking_stack.get_output("private_subnet_id")
-    elif subnet_type == "private2":
-        subnet_id = networking_stack.get_output("private_subnet_id")
-    else:
-        raise Exception("Invalid subnet type. It must be 'public' or 'private' or 'private2'.")
+    subnet_ids = {
+        "public1": "public_subnet_id_1",
+        "public2": "public_subnet_id_2",
+        "public3": "public_subnet_id_3",
+        "private1": "private_subnet_id_1",
+        "private2": "private_subnet_id_2",
+        "private3": "private_subnet_id_3"
+    }
+
+    try:
+        subnet_id = networking_stack.get_output(subnet_ids[subnet_type])
+    except KeyError:
+        raise Exception("Invalid subnet type. It must be 'public' or 'private' with numeric order.")
+
+
+
+    # # Based on the subnet type, decide which subnet ID to use
+    # if subnet_type == "public1":
+    #     subnet_id = networking_stack.get_output("public_subnet_id_1")
+    # elif subnet_type == "public2":
+    #     subnet_id = networking_stack.get_output("public_subnet_id_2")
+    # elif subnet_type == "public3":
+    #     subnet_id = networking_stack.get_output("public_subnet_id_3")
+    # elif subnet_type == "private1":
+    #     subnet_id = networking_stack.get_output("private_subnet_id_1")
+    # elif subnet_type == "private2":
+    #     subnet_id = networking_stack.get_output("private_subnet_id_2")
+    # elif subnet_type == "private3":
+    #     subnet_id = networking_stack.get_output("private_subnet_id_3")
+    # else:
+    #     raise Exception("Invalid subnet type. It must be 'public' or 'private' with numeric order.")
+  
+
+
+
     
     static_private_ips = ec2_instance_config.get("staticPrivateIp", [])
 
@@ -110,14 +139,16 @@ for group_name, group_total_monthly_cost in total_monthly_costs.items():
 #### EKS ########
 
 eks_node_groups = eks_cluster["node_groups"]
-eks_subnet_id = networking_stack.get_output("private_subnet_id")
-eks_subnet_id2 = networking_stack.get_output("private_subnet_id2")
+eks_subnet_id_1 = networking_stack.get_output("private_subnet_id_1")
+eks_subnet_id_2 = networking_stack.get_output("private_subnet_id_2")
+eks_subnet_id_3 = networking_stack.get_output("private_subnet_id_3")
+
 
 
 eks_vpc_config = eks.ClusterVpcConfigArgs(
     public_access_cidrs=['0.0.0.0/0'],
     security_group_ids=get_security_group_ids(eks_cluster['node_groups'][0]['securityGroupName'], networking_stack),
-    subnet_ids=[eks_subnet_id,eks_subnet_id2],
+    subnet_ids=[eks_subnet_id_1,eks_subnet_id_2,eks_subnet_id_3],
 )
 
 eks_cluster_config = config.require_object('eks_cluster')
@@ -138,3 +169,4 @@ eks_component = EKSComponent(
 # Export kubeconfig
 pulumi.export('cluster-name', eks_component.cluster.name)
 pulumi.export('kubeconfig', utils.generate_kube_config(eks_component.cluster))
+####### EKS ########
