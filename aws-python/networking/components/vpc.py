@@ -12,7 +12,7 @@ class VPCComponent:
         total_azs = len(availability_zones)
         subnet_cidrs = generate_subnets(vpc_config['vpcCidrBlock'], total_azs)
         
-        self.vpc = ec2.Vpc(name + "-vpc", cidr_block=vpc_config['vpcCidrBlock'])
+        self.vpc = ec2.Vpc(name + "-vpc", cidr_block=vpc_config['vpcCidrBlock'], tags={"Name": name})
         
         self.public_subnet = []
         self.private_subnet = []

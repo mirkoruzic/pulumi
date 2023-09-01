@@ -14,7 +14,8 @@ class NatGatewayComponent:
             allocation_id=elastic_ip.id,
             opts=pulumi.ResourceOptions(
                 parent=public_subnet,  # Set public subnet as the parent
-            )
+            ),
+            tags={"Name": f"{stack_name}"}
         )
 
         # Define a route for the private subnets to use the NAT Gateway for internet access
