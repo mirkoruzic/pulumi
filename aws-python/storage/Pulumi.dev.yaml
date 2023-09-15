@@ -7,3 +7,4 @@ config:
       - bucket_name: mainlogic-prod
         s3_iam_policy: [s3_public_read_policy]
         public_available: true
+ 
