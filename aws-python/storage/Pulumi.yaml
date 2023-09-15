@@ -1,0 +1,6 @@
+name: storage
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: This project contains AWS storage services such as S3, Docker ECR etc.

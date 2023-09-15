@@ -1,0 +1,9 @@
+config:
+  aws:region: eu-west-1
+  storage:S3:
+      - bucket_name: mainlogic-dev
+        s3_iam_policy: [s3_logging_policy]
+        public_available: false
+      - bucket_name: mainlogic-prod
+        s3_iam_policy: [s3_public_read_policy]
+        public_available: true
