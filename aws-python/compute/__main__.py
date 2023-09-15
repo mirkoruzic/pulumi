@@ -138,35 +138,35 @@ for group_name, group_total_monthly_cost in total_monthly_costs.items():
 
 #### EKS ########
 
-eks_node_groups = eks_cluster["node_groups"]
-eks_subnet_id_1 = networking_stack.get_output("private_subnet_id_1")
-eks_subnet_id_2 = networking_stack.get_output("private_subnet_id_2")
-eks_subnet_id_3 = networking_stack.get_output("private_subnet_id_3")
+# eks_node_groups = eks_cluster["node_groups"]
+# eks_subnet_id_1 = networking_stack.get_output("private_subnet_id_1")
+# eks_subnet_id_2 = networking_stack.get_output("private_subnet_id_2")
+# eks_subnet_id_3 = networking_stack.get_output("private_subnet_id_3")
 
 
 
-eks_vpc_config = eks.ClusterVpcConfigArgs(
-    public_access_cidrs=['0.0.0.0/0'],
-    security_group_ids=get_security_group_ids(eks_cluster['node_groups'][0]['securityGroupName'], networking_stack),
-    subnet_ids=[eks_subnet_id_1,eks_subnet_id_2,eks_subnet_id_3],
-)
+# eks_vpc_config = eks.ClusterVpcConfigArgs(
+#     public_access_cidrs=['0.0.0.0/0'],
+#     security_group_ids=get_security_group_ids(eks_cluster['node_groups'][0]['securityGroupName'], networking_stack),
+#     subnet_ids=[eks_subnet_id_1,eks_subnet_id_2,eks_subnet_id_3],
+# )
 
-eks_cluster_config = config.require_object('eks_cluster')
-# Get IAM role ARNs from the identity stack
-eks_role_arn = identity_stack.get_output("eks_role_arn")
-ec2_role_arn = identity_stack.get_output("ec2_role_arn")
+# eks_cluster_config = config.require_object('eks_cluster')
+# # Get IAM role ARNs from the identity stack
+# eks_role_arn = identity_stack.get_output("eks_role_arn")
+# ec2_role_arn = identity_stack.get_output("ec2_role_arn")
 
-# Create EKS Cluster and Node Groups
-eks_component = EKSComponent(
-    name=f"{current_stack}-eks-cluster",
-    version=eks_cluster_config['version'],
-    node_groups=eks_cluster_config['node_groups'],
-    vpc_config=eks_vpc_config,
-    role_arn=eks_role_arn,
-    node_role_arn=ec2_role_arn,
-)
+# # Create EKS Cluster and Node Groups
+# eks_component = EKSComponent(
+#     name=f"{current_stack}-eks-cluster",
+#     version=eks_cluster_config['version'],
+#     node_groups=eks_cluster_config['node_groups'],
+#     vpc_config=eks_vpc_config,
+#     role_arn=eks_role_arn,
+#     node_role_arn=ec2_role_arn,
+# )
 
-# Export kubeconfig
-pulumi.export('cluster-name', eks_component.cluster.name)
-pulumi.export('kubeconfig', utils.generate_kube_config(eks_component.cluster))
+# # Export kubeconfig
+# pulumi.export('cluster-name', eks_component.cluster.name)
+# pulumi.export('kubeconfig', utils.generate_kube_config(eks_component.cluster))
 ####### EKS ########
