@@ -49,3 +49,4 @@ for sg_config in security_groups_config:
     pulumi.export(f"{sg_config['name']}_security_group_id", security_group_component.security_group.id)
     pulumi.export(f"{sg_config['name']}_security_group_name", sg_config['name'])
 ################################
+

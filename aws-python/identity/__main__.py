@@ -2,6 +2,7 @@ import pulumi
 from pulumi import Config
 from components.ssh_key import SshKey
 from components.eks_iam import EKSIAMComponent
+#from components import s3_iam_policy
 
 # Read the configuration
 config = Config()
@@ -16,6 +17,12 @@ if ssh_keys:
 
 eks_iam_component = EKSIAMComponent("EKSIAMComponent")
 
-# Export the IAM roles
-pulumi.export('eks_role_arn', eks_iam_component.eks_role.arn)
+
+# Output the IAM roles EKS and EC2
+pulumi.export('eks_role_arn', eks_iam_component.eks_rol.arn)
 pulumi.export('ec2_role_arn', eks_iam_component.ec2_role.arn)
+
+s
+
+
+
