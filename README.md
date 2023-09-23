@@ -1,12 +1,6 @@
-# pulumi# Pulumi Cloud Infrastructure
+# Pulumi Cloud Infrastructure
 
 Welcome to the Pulumi Cloud Infrastructure project. This project uses the Pulumi framework with AWS and is written in Python to provide a comprehensive solution for managing cloud resources.
-
-## Project Structure Diagram
-
-![Project Structure](./assets/pulumi.png)
-
-*Note: The above diagram showcases the hierarchical structure and inter-relationship of the various subprojects and their components. It provides a visual representation of how the infrastructure layers interact and depend on each other.*
 
 ## Overview
 
@@ -18,6 +12,12 @@ The project is organized into four distinct subprojects:
 4. **Storage**
 
 Each subproject represents a different layer of our cloud infrastructure. This segregation ensures a clear separation of concerns and optimizes the management of our resources.
+
+## Project Structure Diagram
+
+![Project Structure](./assets/pulumi.png)
+
+*Note: The above diagram showcases the hierarchical structure and inter-relationship of the various subprojects and their components. It provides a visual representation of how the infrastructure layers interact and depend on each other.*
 
 ## State Management
 
