@@ -38,13 +38,13 @@ Each subproject represents a different layer of our cloud infrastructure. This s
         **Windows**
         
         ```powershell
-          docker run -e "PULUMI_ACCESS_TOKEN=<paste_your_token_here>" -it -v ${PWD}:/pulumi/projects -v ${HOME}/.aws/:/root/.aws/ pulumi/pulumi-python:latest bash
+          docker run -e "PULUMI_ACCESS_TOKEN=<paste_your_token_here>" -e "PULUMI_ORG_NAME=<paste_your_org_name>" -it -v ${PWD}:/pulumi/projects -v ${HOME}/.aws/:/root/.aws/ pulumi/pulumi-python:latest bash
         ```
-        
+
         **Linux/MacOS**
 
         ```bash
-        docker run -e "PULUMI_ACCESS_TOKEN=<paste_your_token_here>" -it -v "$(pwd)":/pulumi/projects -v "$HOME/.aws/":/root/.aws/ pulumi/pulumi-python:latest bash
+        docker run -e "PULUMI_ACCESS_TOKEN=<paste_your_token_here>" -e "PULUMI_ORG_NAME=<paste_your_org_name>" -it -v "$(pwd)":/pulumi/projects -v "$HOME/.aws/":/root/.aws/ pulumi/pulumi-python:latest bash
         ```
 
         ```bash
