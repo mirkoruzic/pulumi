@@ -1,11 +1,12 @@
 import pulumi
+import os
+import boto3
+import utils
 from components.ec2_instance import EC2Component
 from components.eks import EKSComponent
 from pulumi import Config, StackReference, Output
 from collections import defaultdict
 from pulumi_aws import eks
-import boto3
-import utils
 from utils import get_security_group_ids
 
 
@@ -23,8 +24,9 @@ num_azs = len(response['AvailabilityZones'])
 current_stack = pulumi.get_stack()
 
 # Reference the networking stack using the same stack name
-networking_stack = StackReference(f"mruzic/networking/{current_stack}")
-identity_stack = StackReference(f"mruzic/identity/{current_stack}")
+org_name = os.environ.get("PULUMI_ORG_NAME", "default_org_name")
+networking_stack = StackReference(f"{org_name}/networking/{current_stack}")
+identity_stack = StackReference(f"{org_name}/identity/{current_stack}")
 
 
 
@@ -57,28 +59,6 @@ for ec2_instance_config in ec2_instances:
         subnet_id = networking_stack.get_output(subnet_ids[subnet_type])
     except KeyError:
         raise Exception("Invalid subnet type. It must be 'public' or 'private' with numeric order.")
-
-
-
-    # # Based on the subnet type, decide which subnet ID to use
-    # if subnet_type == "public1":
-    #     subnet_id = networking_stack.get_output("public_subnet_id_1")
-    # elif subnet_type == "public2":
-    #     subnet_id = networking_stack.get_output("public_subnet_id_2")
-    # elif subnet_type == "public3":
-    #     subnet_id = networking_stack.get_output("public_subnet_id_3")
-    # elif subnet_type == "private1":
-    #     subnet_id = networking_stack.get_output("private_subnet_id_1")
-    # elif subnet_type == "private2":
-    #     subnet_id = networking_stack.get_output("private_subnet_id_2")
-    # elif subnet_type == "private3":
-    #     subnet_id = networking_stack.get_output("private_subnet_id_3")
-    # else:
-    #     raise Exception("Invalid subnet type. It must be 'public' or 'private' with numeric order.")
-  
-
-
-
     
     static_private_ips = ec2_instance_config.get("staticPrivateIp", [])
 
