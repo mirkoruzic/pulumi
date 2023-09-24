@@ -36,7 +36,7 @@ Each subproject represents a different layer of our cloud infrastructure. This s
         - In your VisualCode open your terminal, run the following command and mount the volume to docker container:
         
         ```powershell
-          docker run -e "PULUMI_ACCESS_TOKEN=pul-794d0ab88c86127e8535a6a72e29b0d578f73f49" -it -v ${PWD}:/pulumi/projects -v ${HOME}/.aws/:/root/.aws/ pulumi/pulumi-python:latest bash
+          docker run -e "PULUMI_ACCESS_TOKEN=<paste_your_token_here>" -it -v ${PWD}:/pulumi/projects -v ${HOME}/.aws/:/root/.aws/ pulumi/pulumi-python:latest bash
         ```
 
         ```bash
