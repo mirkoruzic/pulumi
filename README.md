@@ -1,6 +1,8 @@
 # Pulumi Cloud Infrastructure
 
-Welcome to the Pulumi Cloud Infrastructure project. This project uses the Pulumi framework with AWS and is written in Python to provide a comprehensive solution for managing cloud resources.
+Welcome to the Pulumi Cloud Infrastructure initiative. Pulumi offers a versatile SDK, compatible with a multitude of programming languages including Python, JavaScript, TypeScript, Go, and .NET. 
+
+While this breadth empowers developers to leverage their language of choice, in this specific project, i have decided to use Python as a primary language. Designed as an exemplary foundation, this project aims to serve as a pivotal starting point for enthusiasts venturing into infrastructure development with Pulumi on the AWS platform.
 
 ## Overview
 
