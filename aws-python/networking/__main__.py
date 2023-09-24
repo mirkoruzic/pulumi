@@ -13,6 +13,7 @@ vpc_config = pulumi_config.require_object("vpc")
 vpc = VPCComponent(name=vpc_config["vpcName"])
 
 pulumi.export("vpc_id", vpc.vpc.id)
+
 for i, subnet in enumerate(vpc.public_subnet):
     pulumi.export(f"public_subnet_id_{i+1}", subnet.id)
 for i, subnet in enumerate(vpc.private_subnet):

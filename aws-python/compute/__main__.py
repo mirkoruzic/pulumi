@@ -28,8 +28,6 @@ org_name = os.environ.get("PULUMI_ORG_NAME", "default_org_name")
 networking_stack = StackReference(f"{org_name}/networking/{current_stack}")
 identity_stack = StackReference(f"{org_name}/identity/{current_stack}")
 
-
-
 total_monthly_costs = defaultdict(float)
 
 for ec2_instance_config in ec2_instances:
