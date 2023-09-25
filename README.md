@@ -2,7 +2,7 @@
 
 Welcome to the Pulumi Cloud Infrastructure initiative. 
 
-Pulumi offers a versatile SDK, compatible with a multitude of programming languages including Python, JavaScript, TypeScript, Go, and .NET. 
+Pulumi offers a versatile SDK, compatible with a multitude of programming languages including Typescript, Java, Python, Go, and C#. 
 
 While this breadth empowers developers to leverage their language of choice, in this specific project, i have decided to use Python as a primary language. Designed as an exemplary foundation, this project aims to serve as a pivotal starting point for enthusiasts venturing into infrastructure development with Pulumi on the AWS platform.
 
