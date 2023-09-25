@@ -33,11 +33,3 @@ config:
         securityGroupName: [ssh]
         ssh_key_name: aws-ssh-key2-8e32835
 
-
-
-### kreirati bastion u public subnetu
-### kreirati datasync node u privatnom subnetu
-### kreirate endpoint za datasync
-### kreirati agenta sa aktivacionim kljucem
-### kreirati task za sync
-
